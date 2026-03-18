@@ -123,7 +123,7 @@ return res.status(200).cookie("accessToken", accesstoken, option).cookie("refres
 
 })
 
-logoutUser=asyncHandler(async(req,res)=>{
+const logoutUser=asyncHandler(async(req,res)=>{
    //now we area going to create a middle ware 
    //from the middle ware we will dirsctly get user bcs we varified user and have  set req.user=user in middle ware
    await User.findByIdAndUpdate(
@@ -138,7 +138,7 @@ logoutUser=asyncHandler(async(req,res)=>{
     }
 
    )
-    options={
+    const options={
         httpOnly:true,
         secure:true
     }

@@ -27,10 +27,11 @@ email:{
     },
         avtar:{
             type:String,
-            required:true
+            required:false
         },//url of the image(cloudinary)
         coverImage:{
             type:String,
+            required:false
         },
         watchhistory:[{
             type:Schema.Types.ObjectId,
@@ -42,9 +43,9 @@ email:{
 },{timestamps:true});
 
   userSchema.pre("save",async function(next){
-    if(!this.isModified("password")) return next();//checkes whthere password is changed or not
+    if(!this.isModified("password")) return next;//checkes whthere password is changed or not
     this.password = await bcrypt.hash(this.password,10);//encrypt the password 
-    next();
+    next;
   });
 
   //checking password

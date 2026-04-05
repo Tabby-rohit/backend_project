@@ -5,8 +5,8 @@ import {User} from "../models/user.model.js";
 import{ uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import { channel, subscribe } from "diagnostics_channel";
-import { pipeline } from "stream";
+// import { channel, subscribe } from "diagnostics_channel";
+// import { pipeline } from "stream";
 
 const accandreftokengenerator = async (userid) => {
     try {

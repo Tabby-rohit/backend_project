@@ -15,6 +15,7 @@ const Header = () => {
     <header style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', background: '#f0f0f0' }}>
       <div>
         <Link to="/">Home</Link>
+        <Link to="/community" style={{ marginLeft: '1rem' }}>Community</Link>
         {user && <Link to="/dashboard" style={{ marginLeft: '1rem' }}>Dashboard</Link>}
         {user && <Link to="/upload" style={{ marginLeft: '1rem' }}>Upload Video</Link>}
       </div>

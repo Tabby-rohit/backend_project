@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import UploadVideo from './pages/UploadVideo';
 import VideoPlayer from './pages/VideoPlayer';
+import Community from './pages/Community';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/upload" element={<UploadVideo />} />
+          <Route path="/community" element={<Community />} />
           <Route path="/video/:videoId" element={<VideoPlayer />} />
         </Routes>
       </Router>

@@ -16,6 +16,7 @@ const Header = () => {
       <div>
         <Link to="/">Home</Link>
         {user && <Link to="/dashboard" style={{ marginLeft: '1rem' }}>Dashboard</Link>}
+        {user && <Link to="/upload" style={{ marginLeft: '1rem' }}>Upload Video</Link>}
       </div>
       <div>
         {user ? (

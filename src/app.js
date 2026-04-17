@@ -5,7 +5,13 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors'; 
 const app = express();
 const corsOptions = {
-    origin: process.env.Cors_origin === '*' ? true : process.env.Cors_origin,
+    origin: (origin, callback) => {
+        if (!origin || origin.startsWith('http://localhost:')) {
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS blocked from origin: ${origin}`));
+        }
+    },
     credentials: true,
 };
 app.use(cors(corsOptions));

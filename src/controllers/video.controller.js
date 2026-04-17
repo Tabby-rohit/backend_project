@@ -8,71 +8,89 @@ import {uploadOnCloudinary} from "../utils/cloudinary.js"
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-    //TODO: get all videos based on query, sort, pagination
-    const videos= await Video.aggregatePaginate(
+    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+    const videos = await Video.aggregatePaginate(
         [
             {
-                $match: {   
+                $match: {
                     isPublished: true,
                     title: { $regex: query || "", $options: "i" },
-                }
+                },
+            },
+            {
+                $project: {
+                    videoFile: 1,
+                    thumbnail: 1,
+                    title: 1,
+                    description: 1,
+                    duration: 1,
+                    views: 1,
+                    owner: 1,
+                    createdAt: 1,
+                },
+            },
+        ],
+        { page, limit, sort: { [sortBy || "createdAt"]: sortType === "asc" ? 1 : -1 } }
+    );
 
-            },{
-            $project:{
-                videoFile: 1,
-                thumbnail: 1,
-                title: 1,
-                description: 1,
-                duration: 1,
-                views: 1,
-                owner: 1,
-                createdAt: 1
-            }
-}        ],{page, limit, sort: { [sortBy || "createdAt"]: sortType === "asc" ? 1 : -1 }  }
-    )
-
-})
+    res.status(200).json(new ApiResponse(videos, "Videos retrieved successfully", 200));
+});
 
 const publishAVideo = asyncHandler(async (req, res) => {
-    const { title, description} = req.body
+    const { title, description } = req.body;
     if (!title || !description) {
-        throw new ApiError("Title and description are required", 400)
+        throw new ApiError("Title and description are required", 400);
     }
-    const userId= req.user._id
-    const user = await findById(userId)
+    const userId = req.user._id;
+    const user = await User.findById(userId);
     if (!user) {
-        throw new ApiError("User not found", 404)
+        throw new ApiError("User not found", 404);
     }
-    // TODO: get video, upload to cloudinary, create video
-    const videolocalpath = req.file.path
-    if(!videolocalpath) {
-        throw new ApiError("Video file is required", 400)
+
+    const videoFiles = req.files?.videoFile;
+    const thumbnailFiles = req.files?.thumbnail;
+
+    if (!videoFiles?.length) {
+        throw new ApiError("Video file is required", 400);
     }
-    const thumbnailLocalPath = req.file.path
-    if(!thumbnailLocalPath) {
-        throw new ApiError("Thumbnail file is required", 400)
+    if (!thumbnailFiles?.length) {
+        throw new ApiError("Thumbnail file is required", 400);
     }
-    const videoFile = await uploadOnCloudinary(videolocalpath)
-    const thumbnailFile = await uploadOnCloudinary(thumbnailLocalPath)
-    const video= await Video.create({
+
+    const videolocalpath = videoFiles[0].path;
+    const thumbnailLocalPath = thumbnailFiles[0].path;
+
+    const videoUpload = await uploadOnCloudinary(videolocalpath, 'video');
+    const thumbnailUpload = await uploadOnCloudinary(thumbnailLocalPath, 'image');
+
+    if (!videoUpload?.url) {
+        throw new ApiError("Error uploading video file", 500);
+    }
+    if (!thumbnailUpload?.url) {
+        throw new ApiError("Error uploading thumbnail image", 500);
+    }
+
+    const video = await Video.create({
         title,
         description,
-        video: videoFile.url,
-        thumbnail: thumbnailFile.url,
+        videoFile: videoUpload.url,
+        thumbnail: thumbnailUpload.url,
+        duration: videoUpload.duration || 0,
         owner: userId,
-        isPublished: true
-    })
-res.status(201).json(new ApiResponse(video, "Video published successfully", 201))
+        isPublished: true,
+    });
 
-    })
+    res.status(201).json(new ApiResponse(video, "Video published successfully", 201));
+});
 
 
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: get video by id
-    const video = await Video.findById(videoId)
+    const video = await Video.findById(videoId).populate({
+        path: 'owner',
+        select: 'username email _id'
+    })
     if (!video) {
         throw new ApiError("Video not found", 404)
     }

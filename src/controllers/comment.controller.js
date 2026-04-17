@@ -5,46 +5,64 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 
 const getVideoComments = asyncHandler(async (req, res) => {
-    //TODO: get all comments for a video
     const {videoId} = req.params
     const {page = 1, limit = 10} = req.query
     const comments = await Comment.aggregate([
-        {$match: {videoId: mongoose.Types.ObjectId(videoId)}},
+        {$match: {video: new mongoose.Types.ObjectId(videoId)}},
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "ownerData"
+            }
+        },
+        {$unwind: "$ownerData"},
+        {
+            $project: {
+                _id: 1,
+                content: 1,
+                video: 1,
+                owner: "$ownerData",
+                createdAt: 1
+            }
+        },
         {$skip: (page - 1) * limit},
         {$limit: limit}
     ])
 
-    res.status(200).json(new ApiResponse(true, "Comments fetched successfully", comments))
+    res.status(200).json(new ApiResponse(comments, "Comments fetched successfully", 200))
 })
 
 const addComment = asyncHandler(async (req, res) => {
-    // TODO: add a comment to a video
     const {videoId} = req.params
     const {content} = req.body
     const userId = req.user._id
     const comment = await Comment.create({
         content,
-        videoId,
-        userId
+        video: videoId,
+        owner: userId
     })
-    res.status(201).json(new ApiResponse(true, "Comment added successfully", comment))
+    res.status(201).json(new ApiResponse(comment, "Comment added successfully", 201))
 })
 
 const updateComment = asyncHandler(async (req, res) => {
-    // TODO: update a comment
     const {commentId} = req.params
     const {content} = req.body
-    const userId = req.user._id
     const comment = await Comment.findByIdAndUpdate(commentId, {content}, {new: true})
-    res.status(200).json(new ApiResponse(true, "Comment updated successfully", comment))
+    if (!comment) {
+        throw new ApiError("Comment not found", 404)
+    }
+    res.status(200).json(new ApiResponse(comment, "Comment updated successfully", 200))
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
-    // TODO: delete a comment
     const {commentId} = req.params
-    const userId = req.user._id
-    await Comment.findByIdAndDelete(commentId)
-    res.status(200).json(new ApiResponse(true, "Comment deleted successfully"))
+    const comment = await Comment.findByIdAndDelete(commentId)
+    if (!comment) {
+        throw new ApiError("Comment not found", 404)
+    }
+    res.status(200).json(new ApiResponse(null, "Comment deleted successfully", 200))
 })
 
 export {

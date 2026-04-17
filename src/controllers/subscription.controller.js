@@ -7,46 +7,54 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 
 
 const toggleSubscription = asyncHandler(async (req, res) => {
-    const {channelId} = req.params
-    // TODO: toggle subscription
-      const subscriberId = req.user._id
-      if (!isValidObjectId(channelId)) {
-          throw new ApiError("Invalid channelId", 400)
-      }
-        if (channelId === subscriberId.toString()) {
-            throw new ApiError("You cannot subscribe to yourself", 400)
-        }
-      const subscription = await Subscription.findOne({channelId, subscriberId})
-      if (!subscription) {
-            throw new ApiError("Channel not found", 404)}
-      if (subscription) {
-          await Subscription.findByIdAndDelete(subscription._id)
-          res.status(200).json(new ApiResponse(true, "Unsubscribed successfully"))
-      } else {
-          await Subscription.create({channelId, subscriberId})
-          res.status(200).json(new ApiResponse(true, "Subscribed successfully"))
-      }
-})
+    const {channelId} = req.params;
+    const subscriberId = req.user._id;
+    
+    if (!isValidObjectId(channelId)) {
+        throw new ApiError("Invalid channelId", 400);
+    }
+    if (channelId === subscriberId.toString()) {
+        throw new ApiError("You cannot subscribe to yourself", 400);
+    }
+    
+    const subscription = await Subscription.findOne({
+        channel: new mongoose.Types.ObjectId(channelId),
+        subscriber: subscriberId
+    });
+    
+    if (subscription) {
+        await Subscription.findByIdAndDelete(subscription._id);
+        res.status(200).json(new ApiResponse(null, "Unsubscribed successfully", 200));
+    } else {
+        await Subscription.create({
+            channel: new mongoose.Types.ObjectId(channelId),
+            subscriber: subscriberId
+        });
+        res.status(200).json(new ApiResponse(null, "Subscribed successfully", 200));
+    }
+});
 
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const {channelId} = req.params
-    if (!channelId) {
+    if (!isValidObjectId(channelId)) {
         throw new ApiError("Invalid channelId", 400)
     }
-    const subscribers=Subscription.aggregate([
-        {$match:{channelId}},
+    const subscribers = await Subscription.aggregate([
+        {$match:{channel: new mongoose.Types.ObjectId(channelId)}},
         {
             $lookup:{
-            from:User,
-            localField:"subscriberId",
-            foreignField:"_id", 
-            as:"subscriber"
+                from: "users",
+                localField: "subscriber",
+                foreignField: "_id", 
+                as: "subscriberData"
+            }
         },
-        },{$unwind:"$subscriber"},{
+        {$unwind:"$subscriberData"},
+        {
             $project:{
-                _id:0,
-                subscriber:1
+                _id: 0,
+                subscriber: "$subscriberData"
             }
         }
     ])
@@ -56,21 +64,24 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.params
+    if (!isValidObjectId(subscriberId)) {
+        throw new ApiError("Invalid subscriberId", 400)
+    }
     const subscribedChannels = await Subscription.aggregate([
-        { $match: { subscriberId: new mongoose.Types.ObjectId(subscriberId) } },
+        { $match: { subscriber: new mongoose.Types.ObjectId(subscriberId) } },
         {
             $lookup: {
-                from: User.collection.name,
-                localField: "channelId",
+                from: "users",
+                localField: "channel",
                 foreignField: "_id",
-                as: "channel"
+                as: "channelData"
             }
         },
-        { $unwind: "$channel" },
+        { $unwind: "$channelData" },
         {
             $project: {
                 _id: 0,
-                channel: 1
+                channel: "$channelData"
             }
         }
     ])

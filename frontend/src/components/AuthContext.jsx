@@ -12,21 +12,26 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is logged in on app start
     const checkAuth = async () => {
-      try {
-        const response = await api.get('/users/current-user');
-        setUser(response.data.data);
-      } catch (error) {
-        setUser(null);
-      } finally {
-        setLoading(false);
+      const storedToken = localStorage.getItem('accessToken');
+      if (storedToken) {
+        try {
+          const response = await api.get('/users/current-user');
+          setUser(response.data.data);
+        } catch (error) {
+          localStorage.removeItem('accessToken');
+          setUser(null);
+        }
       }
+      setLoading(false);
     };
     checkAuth();
   }, []);
 
   const login = async (email, password) => {
     const response = await api.post('/users/login', { email, password });
-    setUser(response.data.data.user);
+    const { user, accesstoken } = response.data.data;
+    localStorage.setItem('accessToken', accesstoken);
+    setUser(user);
     return response.data;
   };
 
@@ -34,12 +39,17 @@ export const AuthProvider = ({ children }) => {
     const response = await api.post('/users/register', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    setUser(response.data.data.user);
+    const { user, accesstoken } = response.data.data;
+    if (accesstoken) {
+      localStorage.setItem('accessToken', accesstoken);
+    }
+    setUser(user);
     return response.data;
   };
 
   const logout = async () => {
     await api.post('/users/logout');
+    localStorage.removeItem('accessToken');
     setUser(null);
   };
 

@@ -6,8 +6,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import UploadVideo from './pages/UploadVideo';
 import VideoPlayer from './pages/VideoPlayer';
-import './App.css';
 
 function App() {
   return (
@@ -19,6 +19,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/upload" element={<UploadVideo />} />
           <Route path="/video/:videoId" element={<VideoPlayer />} />
         </Routes>
       </Router>

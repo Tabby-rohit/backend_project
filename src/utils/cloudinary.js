@@ -9,30 +9,23 @@ cloudinary.config({
     api_secret:process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary=async(LfilePath)=>{
-    
-
-const stats = fs.statSync(LfilePath);
-console.log("File size:", stats.size);
+const uploadOnCloudinary=async(LfilePath, resourceType = 'image')=>{
+    const stats = fs.statSync(LfilePath);
+    console.log("File size:", stats.size);
     const filePath = path.resolve(LfilePath).replace(/\\/g, "/");
-
-    
     console.log(cloudinary.config());
     try{
-        if(!filePath)return null;
-        console.log("Uploading to Cloudinary:",filePath);
-        const result=await cloudinary.uploader.upload(filePath,{
-            resource_type: "image",
-    use_filename: true,
-    unique_filename: false
+        if(!filePath) return null;
+        console.log("Uploading to Cloudinary:",filePath, "type:", resourceType);
+        const result = await cloudinary.uploader.upload(filePath, {
+            resource_type: resourceType,
+            use_filename: true,
+            unique_filename: false,
         });
-        // if(fs.existsSync(filePath)){
-        // fs.unlinkSync(filePath);}//remove the locally stored file after successful upload
-        console.log("Upload to Cloudinary successful:",result.url);
+        console.log("Upload to Cloudinary successful:", result.url);
         return result;
-    }catch(error){
-       // fs.unlinkSync(filePath);//remove the locally stored file in case of error
-        console.error("Error uploading to Cloudinary:",error);
+    } catch (error) {
+        console.error("Error uploading to Cloudinary:", error);
         return null;
     }
 };

@@ -14,7 +14,8 @@ const Login = () => {
       await login(email, password);
       navigate('/');
     } catch (error) {
-      alert('Login failed');
+      console.error('Login error:', error);
+      alert(error.response?.data?.message || error.message || 'Login failed');
     }
   };
 
@@ -23,8 +24,8 @@ const Login = () => {
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <input
-          type="email"
-          placeholder="Email"
+          type="text"
+          placeholder="Email or username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required

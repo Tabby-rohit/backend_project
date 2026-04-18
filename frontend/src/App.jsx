@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, NavLink, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './components/AuthContext';
+import { useAuth } from './components/AuthContext';
 import Header from './components/Header';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -18,6 +19,20 @@ const sidebarLinks = [
   { to: '/community', label: 'Community' },
   { to: '/profile', label: 'Profile' },
 ];
+
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="page-section">Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
 
 function App() {
   return (
@@ -52,10 +67,31 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/upload" element={<UploadVideo />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/upload"
+                  element={
+                    <ProtectedRoute>
+                      <UploadVideo />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/community" element={<Community />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/video/:videoId" element={<VideoPlayer />} />
               </Routes>
             </main>

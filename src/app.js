@@ -4,9 +4,27 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors'; 
 const app = express();
+
+const configuredOrigins = [
+    process.env.CORS_ORIGIN,
+    process.env.Cors_origin,
+    process.env.FRONTEND_URL,
+]
+    .filter(Boolean)
+    .flatMap((value) => value.split(','))
+    .map((value) => value.trim())
+    .filter(Boolean);
+
 const corsOptions = {
     origin: (origin, callback) => {
-        if (!origin || origin.startsWith('http://localhost:')) {
+        const isLocalOrigin =
+            !origin ||
+            origin.startsWith('http://localhost:') ||
+            origin.startsWith('http://127.0.0.1:');
+
+        const isConfiguredOrigin = configuredOrigins.includes(origin);
+
+        if (isLocalOrigin || isConfiguredOrigin) {
             callback(null, true);
         } else {
             callback(new Error(`CORS blocked from origin: ${origin}`));

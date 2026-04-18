@@ -64,13 +64,15 @@ REFRESH_TOKEN_EXPIRY=10d
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+CORS_ORIGIN=http://localhost:5173
 ```
 
 Notes:
 
 - the backend database name is appended in code as `BACKENDDB`
 - never commit real secrets to Git
-- if you deploy the frontend and backend on different domains, update CORS accordingly in [src/app.js](/D:/projects/src/app.js)
+- example files are available at [.env.example](/D:/projects/.env.example) and [frontend/.env.example](/D:/projects/frontend/.env.example)
+- if you deploy the frontend and backend on different domains, set `CORS_ORIGIN` or `FRONTEND_URL` for the deployed frontend
 
 ## Local Development
 
@@ -129,21 +131,26 @@ Example:
 http://localhost:8000/api/v1/healthcheck
 ```
 
+## Frontend Environment Variables
+
+Create a frontend env file when needed, for example `frontend/.env.production`:
+
+```env
+VITE_API_BASE_URL=https://your-backend-domain.com/api/v1
+VITE_BASE_PATH=/backend_project/
+```
+
+Notes:
+
+- use `VITE_API_BASE_URL` to point the frontend at your deployed backend
+- use `VITE_BASE_PATH` when deploying under a subpath such as GitHub Pages project sites
+- for local development, `VITE_BASE_PATH=/` is correct
+
 ## Important Frontend Deployment Note
 
-The frontend currently uses a hardcoded API base URL in [frontend/src/api/api.js](/D:/projects/frontend/src/api/api.js):
+The frontend now reads its API URL from [frontend/src/api/api.js](/D:/projects/frontend/src/api/api.js) using `VITE_API_BASE_URL`.
 
-```js
-baseURL: 'http://localhost:8000/api/v1'
-```
-
-Before production deployment, change this to your deployed backend URL, for example:
-
-```js
-baseURL: 'https://your-backend-domain.com/api/v1'
-```
-
-For a better production setup, consider moving this to a Vite environment variable such as:
+Example:
 
 ```env
 VITE_API_BASE_URL=https://your-backend-domain.com/api/v1
@@ -210,7 +217,22 @@ frontend/dist
 
 ### Frontend deployment checklist
 
-1. Update the API base URL in [frontend/src/api/api.js](/D:/projects/frontend/src/api/api.js).
+1. Set your frontend environment variables.
+
+For GitHub Pages project deployment:
+
+```env
+VITE_API_BASE_URL=https://your-backend-domain.com/api/v1
+VITE_BASE_PATH=/backend_project/
+```
+
+For root-domain static deployment:
+
+```env
+VITE_API_BASE_URL=https://your-backend-domain.com/api/v1
+VITE_BASE_PATH=/
+```
+
 2. Build the frontend:
 
 ```bash
@@ -219,6 +241,7 @@ npm run build
 ```
 
 3. Deploy the `frontend/dist` folder to your static host.
+4. If using GitHub Pages, the included `404.html` provides SPA route fallback for refreshes.
 
 ## Deploying Backend and Frontend Together
 
@@ -235,11 +258,12 @@ Example:
 
 Then set:
 
-```js
-baseURL: 'https://tweettube-api.onrender.com/api/v1'
+```env
+VITE_API_BASE_URL=https://tweettube-api.onrender.com/api/v1
+VITE_BASE_PATH=/
 ```
 
-And allow the frontend origin in backend CORS.
+And allow the frontend origin in backend CORS with `CORS_ORIGIN=https://tweettube.vercel.app`.
 
 ## Common Deployment Issues
 
@@ -248,6 +272,7 @@ And allow the frontend origin in backend CORS.
 Likely causes:
 
 - frontend still points to `localhost`
+- `VITE_BASE_PATH` does not match the deployed subpath
 - backend CORS does not allow the frontend domain
 - backend server is down
 
@@ -295,9 +320,7 @@ npm run build
 
 For a cleaner production deployment, consider:
 
-- moving frontend API URL to `VITE_API_BASE_URL`
 - adding a backend `start` script in root `package.json`
-- adding a frontend `.env.production`
 - hiding debug `console.log` output in backend upload/auth code
 - adding deployment configs for Render, Railway, or Vercel
 

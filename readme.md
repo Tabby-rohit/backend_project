@@ -304,3 +304,5 @@ For a cleaner production deployment, consider:
 ## Author
 
 Built as a full-stack backend-focused learning project and expanded into the TweetTube UI.
+
+Special credit to Hitesh Choudhary, whose teaching and backend content helped shape the learning journey behind this project.

@@ -16,6 +16,7 @@ const Header = () => {
       <div>
         <Link to="/">Home</Link>
         <Link to="/community" style={{ marginLeft: '1rem' }}>Community</Link>
+        {user && <Link to="/profile" style={{ marginLeft: '1rem' }}>Profile</Link>}
         {user && <Link to="/dashboard" style={{ marginLeft: '1rem' }}>Dashboard</Link>}
         {user && <Link to="/upload" style={{ marginLeft: '1rem' }}>Upload Video</Link>}
       </div>

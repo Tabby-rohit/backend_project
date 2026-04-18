@@ -18,6 +18,10 @@ const VideoPlayer = () => {
       try {
         const response = await api.get(`/videos/${videoId}`);
         setVideo(response.data.data);
+        // Save watch history when a user views the video
+        if (user) {
+          await api.post('/users/history', { videoId });
+        }
         // Fetch like count
         const likeResponse = await api.get(`/likes/videos`);
         setLikeCount(likeResponse.data.data.length);
@@ -35,7 +39,7 @@ const VideoPlayer = () => {
     };
     fetchVideo();
     fetchComments();
-  }, [videoId]);
+  }, [videoId, user]);
 
   const handleToggleLike = async () => {
     try {

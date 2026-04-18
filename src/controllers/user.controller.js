@@ -1,4 +1,5 @@
 import { request } from "express";
+import mongoose from "mongoose";
 import {asyncHandler} from "../utils/asyncHandler.js";
 import { apierror } from "../utils/apiError.js";
 import {User} from "../models/user.model.js";
@@ -307,46 +308,76 @@ const getUserChannelProfile=asyncHandler(async(req,res)=>{
 console.log(channel)
 return res.status(200).json(new ApiResponse(channel[0], "Channel profile retrieved successfully", 200));
 })
-const getUserWatchHistory=asyncHandler(async(req,res)=>{
-    const user=await User.aggregate([
-        {$match:{
-            _id: new mongoose.Types.ObjectId(req.user._id)
-         }
-        },{
-            $lookup:{
-                from:"videos",
-                localField:"watchHistory",
-                foreignField:"_id",
-                as:"watchedHistory",
-                pipleline:[{
-                    $lookup:{
-                        from:"users",
-                        localField:"owner",
-                        foreignField:"_id",
-                        as:"owner",
-                        pipeline:[{
-                            $project:{
-                                username:1,
-                                fullname:1,
-                                avtar:1,
-                        }},{
-                            $addFields:{
-                                owner:{$arrayElemAt:["$owner",0]}
-                            }
-                        }
-                        
-                    ]
-                    }
-                }]
+const getUserWatchHistory = asyncHandler(async (req, res) => {
+    const historyData = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user._id)
             }
-
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchhistory",
+                foreignField: "_id",
+                as: "watchedHistory",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "ownerData"
+                        }
+                    },
+                    { $unwind: { path: "$ownerData", preserveNullAndEmptyArrays: true } },
+                    {
+                        $project: {
+                            _id: 1,
+                            title: 1,
+                            thumbnail: 1,
+                            description: 1,
+                            videoFile: 1,
+                            owner: {
+                                _id: "$ownerData._id",
+                                username: "$ownerData.username",
+                                fullname: "$ownerData.fullname",
+                                avtar: "$ownerData.avtar"
+                            },
+                            createdAt: 1
+                        }
+                    }
+                ]
+            }
         }
-    ])
-   return res.status(200).json(new ApiResponse(user[0].watchedHistory, "User watch history retrieved successfully", 200));
-  
+    ]);
+
+    const watchedHistory = historyData?.[0]?.watchedHistory || [];
+    return res.status(200).json(new ApiResponse(watchedHistory, "User watch history retrieved successfully", 200));
 })
 
-export {registerUser, loginUser,logoutUser,refreshaccessToken,changeCurrentPassword,getcurrentUser,updatecurrentUser,updatecurrentUserAvatar,updatecurrentUserCoverImage,getUserChannelProfile,getUserWatchHistory} 
+const addUserWatchHistory = asyncHandler(async (req, res) => {
+    const { videoId } = req.body;
+    if (!videoId) {
+        throw new apierror("videoId is required", 400);
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new apierror("User not found", 404);
+    }
+
+    const videoObjectId = new mongoose.Types.ObjectId(videoId);
+    const alreadyInHistory = user.watchhistory.some((id) => id.equals(videoObjectId));
+    if (!alreadyInHistory) {
+        user.watchhistory.push(videoObjectId);
+        await user.save();
+    }
+
+    return res.status(200).json(new ApiResponse(user.watchhistory, "Watch history updated successfully", 200));
+})
+
+export {registerUser, loginUser,logoutUser,refreshaccessToken,changeCurrentPassword,getcurrentUser,updatecurrentUser,updatecurrentUserAvatar,updatecurrentUserCoverImage,getUserChannelProfile,getUserWatchHistory, addUserWatchHistory} 
 
 
 

@@ -21,7 +21,7 @@ const Profile = () => {
           api.get('/users/current-user'),
           api.get(`/users/c/${user.username}/channel-profile`),
           api.get('/users/history'),
-          api.get('/likes/videos')
+          api.get('/likes/videos'),
         ]);
 
         setCurrentUser(meRes.data.data);
@@ -40,7 +40,7 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <div style={{ padding: '2rem' }}>
+      <div className="page-section">
         <h1>Profile</h1>
         <p>Please login to view your profile.</p>
       </div>
@@ -49,7 +49,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: '2rem' }}>
+      <div className="page-section">
         <h1>Profile</h1>
         <p>Loading...</p>
       </div>
@@ -57,80 +57,59 @@ const Profile = () => {
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1>Profile</h1>
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', alignItems: 'center' }}>
+    <div className="page-section">
+      <div className="channel-hero">
         <img
           src={currentUser?.avtar || channelProfile?.avatar || '/fallback-avatar.png'}
           alt="Avatar"
-          style={{ width: '120px', height: '120px', borderRadius: '16px', objectFit: 'cover' }}
+          className="profile-avatar"
         />
-        <div>
+        <div className="channel-copy">
+          <p className="eyebrow">Your channel</p>
           <h2>{currentUser?.fullname || currentUser?.username}</h2>
-          <p style={{ margin: 0, color: '#555' }}>@{currentUser?.username}</p>
-          <p style={{ margin: '0.5rem 0 0 0' }}>{currentUser?.email}</p>
+          <p>@{currentUser?.username}</p>
+          <p>{currentUser?.email}</p>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+      <div className="tab-row">
         <button
           onClick={() => setActiveTab('channel')}
-          style={{
-            padding: '0.75rem 1rem',
-            border: '1px solid #ccc',
-            background: activeTab === 'channel' ? '#222' : 'white',
-            color: activeTab === 'channel' ? 'white' : 'black',
-            borderRadius: '6px',
-            cursor: 'pointer'
-          }}
+          className={activeTab === 'channel' ? 'tab-button active' : 'tab-button'}
         >
           Channel
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          style={{
-            padding: '0.75rem 1rem',
-            border: '1px solid #ccc',
-            background: activeTab === 'history' ? '#222' : 'white',
-            color: activeTab === 'history' ? 'white' : 'black',
-            borderRadius: '6px',
-            cursor: 'pointer'
-          }}
+          className={activeTab === 'history' ? 'tab-button active' : 'tab-button'}
         >
           Watch History
         </button>
         <button
           onClick={() => setActiveTab('likes')}
-          style={{
-            padding: '0.75rem 1rem',
-            border: '1px solid #ccc',
-            background: activeTab === 'likes' ? '#222' : 'white',
-            color: activeTab === 'likes' ? 'white' : 'black',
-            borderRadius: '6px',
-            cursor: 'pointer'
-          }}
+          className={activeTab === 'likes' ? 'tab-button active' : 'tab-button'}
         >
           Liked Videos
         </button>
       </div>
 
       {activeTab === 'channel' && (
-        <div>
+        <div className="panel">
           <h2>Channel Info</h2>
-          <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-            <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+          <div className="stats-grid">
+            <div className="stat-card">
               <strong>Subscribers</strong>
               <p>{channelProfile?.subscribersCount ?? 0}</p>
             </div>
-            <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+            <div className="stat-card">
               <strong>Subscriptions</strong>
               <p>{channelProfile?.subscribedToCount ?? 0}</p>
             </div>
-            <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+            <div className="stat-card">
               <strong>Channel Name</strong>
               <p>{channelProfile?.username}</p>
             </div>
-            <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+            <div className="stat-card">
               <strong>Full Name</strong>
               <p>{channelProfile?.fullname}</p>
             </div>
@@ -139,19 +118,19 @@ const Profile = () => {
       )}
 
       {activeTab === 'history' && (
-        <div>
+        <div className="panel">
           <h2>Watch History</h2>
           {watchHistory.length === 0 ? (
             <p>You haven't watched any videos yet.</p>
           ) : (
-            <div style={{ display: 'grid', gap: '1rem' }}>
+            <div className="stack-list">
               {watchHistory.map((video) => (
-                <div key={video._id} style={{ display: 'flex', gap: '1rem', padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
-                  <img src={video.thumbnail} alt={video.title} style={{ width: '180px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />
+                <div key={video._id} className="list-row">
+                  <img src={video.thumbnail} alt={video.title} />
                   <div>
                     <strong>{video.title}</strong>
-                    <p style={{ margin: '0.5rem 0 0 0' }}>{video.description}</p>
-                    <p style={{ margin: '0.5rem 0 0 0', color: '#555' }}>By {video.owner?.fullname || video.owner?.username}</p>
+                    <p>{video.description}</p>
+                    <p>By {video.owner?.fullname || video.owner?.username}</p>
                   </div>
                 </div>
               ))}
@@ -161,18 +140,18 @@ const Profile = () => {
       )}
 
       {activeTab === 'likes' && (
-        <div>
+        <div className="panel">
           <h2>Liked Videos</h2>
           {likedVideos.length === 0 ? (
             <p>You haven't liked any videos yet.</p>
           ) : (
-            <div style={{ display: 'grid', gap: '1rem' }}>
+            <div className="stack-list">
               {likedVideos.map((video) => (
-                <div key={video._id} style={{ display: 'flex', gap: '1rem', padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
-                  <img src={video.thumbnail} alt={video.title} style={{ width: '180px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />
+                <div key={video._id} className="list-row">
+                  <img src={video.thumbnail} alt={video.title} />
                   <div>
                     <strong>{video.title}</strong>
-                    <p style={{ margin: '0.5rem 0 0 0' }}>{video.description || 'No description available'}</p>
+                    <p>{video.description || 'No description available'}</p>
                   </div>
                 </div>
               ))}

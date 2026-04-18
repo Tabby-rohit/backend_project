@@ -1,10 +1,11 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 const Header = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await logout();
@@ -12,27 +13,61 @@ const Header = () => {
   };
 
   return (
-    <header style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', background: '#f0f0f0' }}>
-      <div>
-        <Link to="/">Home</Link>
-        <Link to="/community" style={{ marginLeft: '1rem' }}>Community</Link>
-        {user && <Link to="/profile" style={{ marginLeft: '1rem' }}>Profile</Link>}
-        {user && <Link to="/dashboard" style={{ marginLeft: '1rem' }}>Dashboard</Link>}
-        {user && <Link to="/upload" style={{ marginLeft: '1rem' }}>Upload Video</Link>}
+    <header className="topbar">
+      <Link to="/" className="brand">
+        <span className="brand-mark" aria-hidden="true">
+          <span className="brand-play"></span>
+        </span>
+        <span>
+          <strong>TweetTube</strong>
+          <small>stream, watch, share</small>
+        </span>
+      </Link>
+
+      <div className="topbar-search">
+        <input
+          type="text"
+          placeholder="Search videos, creators, tweets"
+          aria-label="Search"
+          readOnly
+          value=""
+        />
+        <button type="button">Search</button>
       </div>
-      <div>
+
+      <nav className="topbar-actions">
+        <Link
+          to="/community"
+          className={location.pathname === '/community' ? 'pill-link active' : 'pill-link'}
+        >
+          Community
+        </Link>
         {user ? (
           <>
-            <span>Welcome, {user.username}</span>
-            <button onClick={handleLogout} style={{ marginLeft: '1rem' }}>Logout</button>
+            <Link to="/upload" className="pill-link emphasis">
+              Create
+            </Link>
+            <Link to="/profile" className="profile-chip">
+              <span className="avatar-badge">
+                {(user.username || 'T').slice(0, 1).toUpperCase()}
+              </span>
+              <span>{user.username}</span>
+            </Link>
+            <button onClick={handleLogout} className="ghost-button">
+              Logout
+            </button>
           </>
         ) : (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/register" style={{ marginLeft: '1rem' }}>Register</Link>
+            <Link to="/login" className="pill-link">
+              Login
+            </Link>
+            <Link to="/register" className="pill-link emphasis">
+              Join
+            </Link>
           </>
         )}
-      </div>
+      </nav>
     </header>
   );
 };

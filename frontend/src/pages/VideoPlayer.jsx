@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import api from '../api/api';
 import { useAuth } from '../components/AuthContext';
 
@@ -18,17 +18,18 @@ const VideoPlayer = () => {
       try {
         const response = await api.get(`/videos/${videoId}`);
         setVideo(response.data.data);
-        // Save watch history when a user views the video
+
         if (user) {
           await api.post('/users/history', { videoId });
         }
-        // Fetch like count
-        const likeResponse = await api.get(`/likes/videos`);
+
+        const likeResponse = await api.get('/likes/videos');
         setLikeCount(likeResponse.data.data.length);
       } catch (error) {
         console.error('Failed to fetch video', error);
       }
     };
+
     const fetchComments = async () => {
       try {
         const response = await api.get(`/comments/${videoId}`);
@@ -37,6 +38,7 @@ const VideoPlayer = () => {
         console.error('Failed to fetch comments', error);
       }
     };
+
     fetchVideo();
     fetchComments();
   }, [videoId, user]);
@@ -57,6 +59,7 @@ const VideoPlayer = () => {
       alert('Please login to subscribe');
       return;
     }
+
     try {
       await api.post(`/subscriptions/c/${video.owner._id}`);
       setIsSubscribed(!isSubscribed);
@@ -68,6 +71,7 @@ const VideoPlayer = () => {
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
+
     try {
       await api.post(`/comments/${videoId}`, { content: newComment });
       setNewComment('');
@@ -79,57 +83,104 @@ const VideoPlayer = () => {
     }
   };
 
-  if (!video) return <div>Loading...</div>;
+  if (!video) return <div className="page-section">Loading...</div>;
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>{video.title}</h1>
-      <video controls style={{ width: '100%', maxHeight: '500px' }}>
-        <source src={video.videoFile} type="video/mp4" />
-      </video>
-      <p>{video.description}</p>
-      
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-        <button onClick={handleToggleLike} style={{ padding: '0.5rem 1rem' }}>
-          {isLiked ? '👍 Unlike' : '👍 Like'} ({likeCount})
-        </button>
-        {video.owner && (
-          <>
-            <div style={{ padding: '0.5rem 1rem' }}>
-              Channel: <strong>{video.owner.username}</strong>
-            </div>
-            <button onClick={handleToggleSubscribe} style={{ padding: '0.5rem 1rem' }}>
-              {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-            </button>
-          </>
-        )}
-      </div>
+    <div className="watch-layout">
+      <section className="watch-main">
+        <div className="video-player-shell">
+          <video controls>
+            <source src={video.videoFile} type="video/mp4" />
+          </video>
+        </div>
 
-      <div style={{ marginTop: '2rem' }}>
-        <h3>Comments</h3>
-        {user && (
-          <div style={{ marginBottom: '1rem' }}>
-            <input
-              type="text"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment"
-              style={{ width: '100%', padding: '0.5rem' }}
-            />
-            <button onClick={handleAddComment} style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}>
-              Comment
-            </button>
+        <h1 className="watch-title">{video.title}</h1>
+
+        <div className="watch-actions">
+          <div className="channel-summary">
+            <span className="avatar-badge large">
+              {(video.owner?.username || 'T').slice(0, 1).toUpperCase()}
+            </span>
+            <div>
+              <strong>{video.owner?.username || 'TweetTube creator'}</strong>
+              <p>{video.owner?.email || 'Channel owner'}</p>
+            </div>
           </div>
-        )}
-        {!user && <p>Please login to comment</p>}
-        <ul>
-          {comments.map(comment => (
-            <li key={comment._id} style={{ marginBottom: '0.5rem' }}>
-              <strong>{comment.owner?.fullname || comment.owner?.username || 'Anonymous'}</strong>: {comment.content}
-            </li>
-          ))}
-        </ul>
-      </div>
+
+          <div className="watch-buttons">
+            <button onClick={handleToggleLike} className="pill-link emphasis button-reset">
+              {isLiked ? 'Unlike' : 'Like'} ({likeCount})
+            </button>
+            {video.owner && (
+              <button onClick={handleToggleSubscribe} className="pill-link button-reset">
+                {isSubscribed ? 'Subscribed' : 'Subscribe'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="description-box">
+          <p>{video.description}</p>
+        </div>
+
+        <div className="panel">
+          <div className="panel-heading">
+            <h2>Comments</h2>
+            <p>{comments.length} responses</p>
+          </div>
+
+          {user && (
+            <div className="comment-composer">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(event) => setNewComment(event.target.value)}
+                placeholder="Add a comment"
+              />
+              <button onClick={handleAddComment} className="primary-button">
+                Comment
+              </button>
+            </div>
+          )}
+
+          {!user && <p>Please login to comment</p>}
+
+          <div className="stack-list">
+            {comments.map((comment) => (
+              <article key={comment._id} className="comment-row">
+                <span className="avatar-badge">
+                  {(comment.owner?.username || 'A').slice(0, 1).toUpperCase()}
+                </span>
+                <div>
+                  <strong>{comment.owner?.fullname || comment.owner?.username || 'Anonymous'}</strong>
+                  <p>{comment.content}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <aside className="watch-side">
+        <div className="panel sticky-panel">
+          <p className="eyebrow">More from TweetTube</p>
+          <h2>Keep exploring</h2>
+          <div className="stack-list">
+            <Link to="/" className="promo-card">
+              <strong>Back to Home</strong>
+              <span>Browse the latest uploads</span>
+            </Link>
+            <Link to="/community" className="promo-card">
+              <strong>Community Feed</strong>
+              <span>See what creators are posting</span>
+            </Link>
+            <Link to="/upload" className="promo-card">
+              <strong>Upload next</strong>
+              <span>Publish your own video</span>
+            </Link>
+          </div>
+        </div>
+      </aside>
     </div>
   );
 };

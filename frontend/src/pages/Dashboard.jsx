@@ -14,6 +14,7 @@ const Dashboard = () => {
         console.error('Failed to fetch stats', error);
       }
     };
+
     const fetchVideos = async () => {
       try {
         const response = await api.get('/dashboard/videos');
@@ -22,27 +23,64 @@ const Dashboard = () => {
         console.error('Failed to fetch videos', error);
       }
     };
+
     fetchStats();
     fetchVideos();
   }, []);
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <div>
-        <h2>Stats</h2>
-        <p>Total Views: {stats.totalViews}</p>
-        <p>Total Subscribers: {stats.totalSubscribers}</p>
-        <p>Total Videos: {stats.totalVideos}</p>
+    <div className="page-section">
+      <div className="page-header">
+        <div>
+          <p className="eyebrow">Creator studio</p>
+          <h1>Channel Dashboard</h1>
+          <p>Track how your TweetTube channel is performing.</p>
+        </div>
       </div>
-      <div>
-        <h2>Your Videos</h2>
-        <ul>
-          {videos.map(video => (
-            <li key={video._id}>{video.title}</li>
-          ))}
-        </ul>
-      </div>
+
+      <section className="stats-grid">
+        <article className="stat-card">
+          <span>Views</span>
+          <strong>{stats.totalViews ?? 0}</strong>
+        </article>
+        <article className="stat-card">
+          <span>Subscribers</span>
+          <strong>{stats.totalSubscribers ?? 0}</strong>
+        </article>
+        <article className="stat-card">
+          <span>Videos</span>
+          <strong>{stats.totalVideos ?? 0}</strong>
+        </article>
+        <article className="stat-card accent">
+          <span>Likes</span>
+          <strong>{stats.totalLikes ?? 0}</strong>
+        </article>
+      </section>
+
+      <section className="panel">
+        <div className="panel-heading">
+          <h2>Your uploads</h2>
+          <p>{videos.length} videos in your library</p>
+        </div>
+
+        {videos.length === 0 ? (
+          <div className="empty-state compact">
+            <p>No channel uploads yet. Publish a video to populate this studio.</p>
+          </div>
+        ) : (
+          <div className="stack-list">
+            {videos.map((video) => (
+              <article key={video._id} className="list-row">
+                <img src={video.thumbnail} alt={video.title} />
+                <div>
+                  <h3>{video.title}</h3>
+                  <p>{video.description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

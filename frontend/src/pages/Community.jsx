@@ -54,14 +54,14 @@ const Community = () => {
   const handleToggleLikeTweet = async (tweetId) => {
     try {
       await api.post(`/likes/toggle/t/${tweetId}`);
-      setLikedTweets(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(tweetId)) {
-          newSet.delete(tweetId);
+      setLikedTweets((prev) => {
+        const next = new Set(prev);
+        if (next.has(tweetId)) {
+          next.delete(tweetId);
         } else {
-          newSet.add(tweetId);
+          next.add(tweetId);
         }
-        return newSet;
+        return next;
       });
     } catch (error) {
       console.error('Failed to toggle like', error);
@@ -69,125 +69,68 @@ const Community = () => {
     }
   };
 
-  if (loading) return <div style={{ padding: '1rem' }}>Loading...</div>;
+  if (loading) return <div className="page-section">Loading...</div>;
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-      <h1>Community</h1>
+    <div className="page-section">
+      <div className="page-header">
+        <div>
+          <p className="eyebrow">Pulse</p>
+          <h1>TweetTube Community</h1>
+          <p>Short posts from creators and viewers, inspired by the social side of the platform.</p>
+        </div>
+      </div>
 
       {user && (
-        <div style={{
-          background: '#f5f5f5',
-          padding: '1rem',
-          borderRadius: '8px',
-          marginBottom: '2rem',
-          border: '1px solid #ddd'
-        }}>
+        <div className="panel">
           <h3>What's on your mind?</h3>
           <textarea
             value={newTweet}
-            onChange={(e) => setNewTweet(e.target.value)}
+            onChange={(event) => setNewTweet(event.target.value)}
             placeholder="Share your thoughts..."
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              minHeight: '100px',
-              fontFamily: 'Arial, sans-serif',
-              boxSizing: 'border-box'
-            }}
+            className="tweet-box"
           />
-          <button
-            onClick={handleCreateTweet}
-            style={{
-              marginTop: '0.75rem',
-              padding: '0.75rem 1.5rem',
-              background: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: 'bold'
-            }}
-          >
+          <button onClick={handleCreateTweet} className="primary-button">
             Tweet
           </button>
         </div>
       )}
 
       {!user && (
-        <div style={{
-          background: '#fff3cd',
-          padding: '1rem',
-          borderRadius: '4px',
-          marginBottom: '2rem',
-          border: '1px solid #ffc107'
-        }}>
+        <div className="empty-state compact">
           <p>Please login to create tweets</p>
         </div>
       )}
 
-      <div>
+      <div className="stack-list">
         <h2>Community Feed</h2>
         {tweets.length === 0 ? (
-          <p>No tweets yet. Be the first to share!</p>
+          <p>No tweets yet. Be the first to share.</p>
         ) : (
-          <div>
-            {tweets.map(tweet => (
-              <div
-                key={tweet._id}
-                style={{
-                  background: 'white',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  padding: '1rem',
-                  marginBottom: '1rem'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+          <div className="stack-list">
+            {tweets.map((tweet) => (
+              <div key={tweet._id} className="tweet-card">
+                <div className="tweet-top">
                   <div>
                     <strong>{tweet.owner?.fullname || tweet.owner?.username || 'Anonymous'}</strong>
-                    <span style={{ color: '#666', marginLeft: '0.5rem' }}>
-                      @{tweet.owner?.username}
-                    </span>
-                    <p style={{ color: '#999', fontSize: '0.85rem', margin: '0.25rem 0 0 0' }}>
-                      {new Date(tweet.createdAt).toLocaleDateString()}
-                    </p>
+                    <span className="tweet-handle">@{tweet.owner?.username}</span>
+                    <p className="tweet-date">{new Date(tweet.createdAt).toLocaleDateString()}</p>
                   </div>
                   {user && user._id === tweet.owner?._id && (
-                    <button
-                      onClick={() => handleDeleteTweet(tweet._id)}
-                      style={{
-                        padding: '0.5rem 0.75rem',
-                        background: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem'
-                      }}
-                    >
+                    <button onClick={() => handleDeleteTweet(tweet._id)} className="ghost-button danger">
                       Delete
                     </button>
                   )}
                 </div>
 
-                <p style={{ margin: '1rem 0' }}>{tweet.content}</p>
+                <p className="tweet-content">{tweet.content}</p>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div>
                   <button
                     onClick={() => handleToggleLikeTweet(tweet._id)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      background: likedTweets.has(tweet._id) ? '#dc3545' : '#e9ecef',
-                      color: likedTweets.has(tweet._id) ? 'white' : 'black',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
+                    className={likedTweets.has(tweet._id) ? 'pill-link emphasis button-reset' : 'pill-link button-reset'}
                   >
-                    ❤️ Like
+                    Like
                   </button>
                 </div>
               </div>

@@ -11,8 +11,8 @@ const UploadVideo = () => {
   });
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
+  const handleChange = (event) => {
+    const { name, value, files } = event.target;
     if (files) {
       setFormData({ ...formData, [name]: files[0] });
     } else {
@@ -20,8 +20,8 @@ const UploadVideo = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     const data = new FormData();
     data.append('title', formData.title);
     data.append('description', formData.description);
@@ -41,51 +41,68 @@ const UploadVideo = () => {
   };
 
   return (
-    <div>
-      <h2>Upload Video</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Title
-          <input
-            type="text"
-            name="title"
-            placeholder="Video title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Description
-          <textarea
-            name="description"
-            placeholder="Video description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-          ></textarea>
-        </label>
-        <label>
-          Video file (videoFile)
-          <input
-            type="file"
-            name="videoFile"
-            onChange={handleChange}
-            accept="video/*"
-            required
-          />
-        </label>
-        <label>
-          Thumbnail image (thumbnail)
-          <input
-            type="file"
-            name="thumbnail"
-            onChange={handleChange}
-            accept="image/*"
-            required
-          />
-        </label>
-        <button type="submit">Upload</button>
+    <div className="page-section">
+      <div className="page-header">
+        <div>
+          <p className="eyebrow">Studio</p>
+          <h1>Upload to TweetTube</h1>
+          <p>Drop in a title, description, video file, and thumbnail to publish.</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="panel upload-form">
+        <div className="form-grid">
+          <label className="field">
+            <span>Title</span>
+            <input
+              type="text"
+              name="title"
+              placeholder="Video title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+            />
+          </label>
+
+          <label className="field field-full">
+            <span>Description</span>
+            <textarea
+              name="description"
+              placeholder="Tell viewers what this video is about"
+              value={formData.description}
+              onChange={handleChange}
+              required
+            ></textarea>
+          </label>
+
+          <label className="field">
+            <span>Video file</span>
+            <input
+              type="file"
+              name="videoFile"
+              onChange={handleChange}
+              accept="video/*"
+              required
+            />
+          </label>
+
+          <label className="field">
+            <span>Thumbnail</span>
+            <input
+              type="file"
+              name="thumbnail"
+              onChange={handleChange}
+              accept="image/*"
+              required
+            />
+          </label>
+        </div>
+
+        <div className="form-actions">
+          <button type="submit" className="primary-button">
+            Publish Video
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -14,8 +14,8 @@ const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
+  const handleChange = (event) => {
+    const { name, value, files } = event.target;
     if (files) {
       setFormData({ ...formData, [name]: files[0] });
     } else {
@@ -23,12 +23,13 @@ const Register = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     const data = new FormData();
-    Object.keys(formData).forEach(key => {
+    Object.keys(formData).forEach((key) => {
       if (formData[key]) data.append(key, formData[key]);
     });
+
     try {
       await register(data);
       navigate('/');
@@ -39,50 +40,49 @@ const Register = () => {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="fullname"
-          placeholder="Full Name"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="file"
-          name="avatar"
-          onChange={handleChange}
-          accept="image/*"
-        />
-        <input
-          type="file"
-          name="coverImage"
-          onChange={handleChange}
-          accept="image/*"
-        />
-        <button type="submit">Register</button>
+    <div className="auth-layout">
+      <section className="auth-promo">
+        <p className="eyebrow">Start your channel</p>
+        <h1>Create your TweetTube account</h1>
+        <p>Set up your profile, customize your visuals, and start posting videos.</p>
+      </section>
+
+      <form onSubmit={handleSubmit} className="panel auth-form">
+        <h2>Register</h2>
+
+        <label className="field">
+          <span>Username</span>
+          <input type="text" name="username" placeholder="Username" onChange={handleChange} required />
+        </label>
+
+        <label className="field">
+          <span>Email</span>
+          <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
+        </label>
+
+        <label className="field">
+          <span>Password</span>
+          <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
+        </label>
+
+        <label className="field">
+          <span>Full name</span>
+          <input type="text" name="fullname" placeholder="Full Name" onChange={handleChange} required />
+        </label>
+
+        <label className="field">
+          <span>Avatar</span>
+          <input type="file" name="avatar" onChange={handleChange} accept="image/*" />
+        </label>
+
+        <label className="field">
+          <span>Cover image</span>
+          <input type="file" name="coverImage" onChange={handleChange} accept="image/*" />
+        </label>
+
+        <button type="submit" className="primary-button">
+          Create account
+        </button>
       </form>
     </div>
   );

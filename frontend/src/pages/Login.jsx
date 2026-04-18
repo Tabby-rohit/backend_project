@@ -8,8 +8,8 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
       await login(email, password);
       navigate('/');
@@ -20,24 +20,40 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Email or username"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Login</button>
+    <div className="auth-layout">
+      <section className="auth-promo">
+        <p className="eyebrow">Welcome back</p>
+        <h1>Sign in to TweetTube</h1>
+        <p>Jump back into your subscriptions, likes, uploads, and community feed.</p>
+      </section>
+
+      <form onSubmit={handleSubmit} className="panel auth-form">
+        <h2>Login</h2>
+        <label className="field">
+          <span>Email or username</span>
+          <input
+            type="text"
+            placeholder="Email or username"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </label>
+
+        <label className="field">
+          <span>Password</span>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+        </label>
+
+        <button type="submit" className="primary-button">
+          Login
+        </button>
       </form>
     </div>
   );

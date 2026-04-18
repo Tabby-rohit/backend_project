@@ -57,7 +57,7 @@ const registerUser = asyncHandler(async (req, res) => {
     console.log("step0")
     const coverfile = req.files?.coverImage[0];
     console.log("step1")
-    const Avatar = await uploadOnCloudinary(loavatarcalpath);
+    const Avatar = await uploadOnCloudinary(avatarfile.buffer);
     console.log("step2")
     const CoverImage = await uploadOnCloudinary(coverfile.buffer);
     console.log("step3")

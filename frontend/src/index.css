@@ -480,12 +480,21 @@ button {
 
 .list-row {
   display: grid;
-  grid-template-columns: 190px 1fr;
+  grid-template-columns: 190px 1fr auto;
   gap: 16px;
   align-items: center;
   padding: 12px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.03);
+}
+
+.list-row-body {
+  min-width: 0;
+}
+
+.list-row-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .list-row img {
@@ -703,6 +712,10 @@ button {
   .form-grid,
   .list-row {
     grid-template-columns: 1fr;
+  }
+
+  .list-row-actions {
+    justify-content: flex-start;
   }
 
   .topbar-actions {

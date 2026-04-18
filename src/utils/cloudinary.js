@@ -9,24 +9,17 @@ cloudinary.config({
     api_secret:process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary=async(LfilePath, resourceType = 'image')=>{
-    const stats = fs.statSync(LfilePath);
-    console.log("File size:", stats.size);
-    const filePath = path.resolve(LfilePath).replace(/\\/g, "/");
-    console.log(cloudinary.config());
-    try{
-        if(!filePath) return null;
-        console.log("Uploading to Cloudinary:",filePath, "type:", resourceType);
-        const result = await cloudinary.uploader.upload(filePath, {
-            resource_type: resourceType,
-            use_filename: true,
-            unique_filename: false,
-        });
-        console.log("Upload to Cloudinary successful:", result.url);
-        return result;
-    } catch (error) {
-        console.error("Error uploading to Cloudinary:", error);
-        return null;
-    }
+const uploadOnCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: "image" },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
 };
 export { uploadOnCloudinary };

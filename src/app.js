@@ -25,9 +25,15 @@ const corsOptions = {
             origin.startsWith('http://localhost:') ||
             origin.startsWith('http://127.0.0.1:');
 
-        const isConfiguredOrigin = configuredOrigins.includes(origin);
+        const normalizedOrigin = origin?.replace(/\/$/, '');
+        const isConfiguredOrigin =
+            configuredOrigins.includes(origin) ||
+            configuredOrigins.includes(normalizedOrigin);
 
-        if (isLocalOrigin || isConfiguredOrigin) {
+        const isGitHubPagesOrigin =
+            normalizedOrigin === 'https://tabby-rohit.github.io';
+
+        if (isLocalOrigin || isConfiguredOrigin || isGitHubPagesOrigin) {
             callback(null, true);
         } else {
             callback(new Error(`CORS blocked from origin: ${origin}`));

@@ -2,6 +2,7 @@
 import{v2 as cloudinary}from"cloudinary";
 import fs from"fs";
 import path from"path";
+import streamifier from"streamifier";
 console.log("Cloudinary Config:",process.env.CLOUDINARY_API_KEY,process.env.CLOUDINARY_API_SECRET,process.env.CLOUDINARY_CLOUD_NAME);
 cloudinary.config({
     cloud_name:process.env.CLOUDINARY_CLOUD_NAME,   

@@ -243,6 +243,38 @@ npm run build
 3. Deploy the `frontend/dist` folder to your static host.
 4. If using GitHub Pages, the included `404.html` provides SPA route fallback for refreshes.
 
+### GitHub Pages deployment
+
+This repo now includes an automatic GitHub Pages workflow at [.github/workflows/deploy-pages.yml](/D:/projects/.github/workflows/deploy-pages.yml).
+
+For this repository, it builds with:
+
+```env
+VITE_BASE_PATH=/backend_project/
+```
+
+Before the deployed app can call your backend, set this GitHub repository variable:
+
+```text
+VITE_API_BASE_URL
+```
+
+Example value:
+
+```text
+https://your-backend-domain.com/api/v1
+```
+
+Then in GitHub:
+
+1. Open the repository.
+2. Go to `Settings`.
+3. Go to `Pages`.
+4. Set `Source` to `GitHub Actions`.
+5. Go to `Settings > Secrets and variables > Actions > Variables`.
+6. Add `VITE_API_BASE_URL` with your deployed backend URL.
+7. Push to `main` to trigger deployment.
+
 ## Deploying Backend and Frontend Together
 
 Recommended setup:

@@ -1,7 +1,7 @@
 import { request } from "express";
 import mongoose from "mongoose";
 import {asyncHandler} from "../utils/asyncHandler.js";
-import { apierror } from "../utils/apiError.js";
+import { apierror } from "../utils/ApiError.js";
 import {User} from "../models/user.model.js";
 import{ uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";

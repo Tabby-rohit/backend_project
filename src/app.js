@@ -1,22 +1,25 @@
 
+import "dotenv/config";
 import express from 'express';
 
 import cookieParser from 'cookie-parser';
 import cors from 'cors'; 
 const app = express();
 
-const configuredOrigins = [
-    process.env.CORS_ORIGIN,
-    process.env.Cors_origin,
-    process.env.FRONTEND_URL,
-]
-    .filter(Boolean)
-    .flatMap((value) => value.split(','))
-    .map((value) => value.trim())
-    .filter(Boolean);
+const getConfiguredOrigins = () =>
+    [
+        process.env.CORS_ORIGIN,
+        process.env.Cors_origin,
+        process.env.FRONTEND_URL,
+    ]
+        .filter(Boolean)
+        .flatMap((value) => value.split(','))
+        .map((value) => value.trim())
+        .filter(Boolean);
 
 const corsOptions = {
     origin: (origin, callback) => {
+        const configuredOrigins = getConfiguredOrigins();
         const isLocalOrigin =
             !origin ||
             origin.startsWith('http://localhost:') ||
